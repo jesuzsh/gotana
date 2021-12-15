@@ -1,5 +1,12 @@
 package payloads
 
+type MatchListPayload struct {
+	Gamertag string `json:"gamertag"`
+	Count    int    `json:"count"`
+	Offset   int    `json:"offset"`
+	Mode     string `json:"mode"`
+}
+
 type MatchList struct {
 	Additional struct {
 		Gamertag string `json:"gamertag"`
