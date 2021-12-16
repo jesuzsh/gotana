@@ -9,44 +9,34 @@ import (
 	"net/http"
 	"os"
 
-	"go-halo.com/hapi/payloads"
+	pl "go-halo.com/hapi/payloads"
 )
 
 // List returns some matches
-func List() (payloads.MatchList, error) {
-	url := os.Getenv("HAPI_URL")
-
-	// The first step would be identifying a gamertag (gt)
-	gt := "Lentilius"
-	mlp, err := json.Marshal(payloads.MatchListPayload{
-		Gamertag: gt,
-		Count:    3,
-		Offset:   0,
-		Mode:     "matchmade"})
-	if err != nil {
-		log.Fatalln(err)
+func List(mp pl.MaxPayload) (pl.MatchList, error) {
+	if mp.Gamertag == "" {
+		return pl.MatchList{}, errors.New("empty payload")
 	}
 
-	log.Println(url)
+	mlp, err := json.Marshal(mp)
+	if err != nil {
+		log.Printf("failed to marshal a MaxPayload", err)
+	}
 
+	url := os.Getenv("HAPI_URL")
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(mlp))
 	if err != nil {
-		log.Fatalln(err)
+		log.Printf("unable to obtain MatchList", err)
 	}
-
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalln(err)
+		log.Printf("unable to read the response body", err)
 	}
 
-	ml := payloads.MatchList{}
+	ml := pl.MatchList{}
 	json.Unmarshal([]byte(body), &ml)
-
-	if true == false {
-		return ml, errors.New("fake ass error")
-	}
 
 	return ml, nil
 }

@@ -1,6 +1,6 @@
 package payloads
 
-type MatchListPayload struct {
+type MaxPayload struct {
 	Gamertag string `json:"gamertag"`
 	Count    int    `json:"count"`
 	Offset   int    `json:"offset"`
