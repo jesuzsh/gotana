@@ -7,5 +7,9 @@ import (
 )
 
 func main() {
-	fmt.Println(matches.List())
+	ml, _ := matches.List()
+
+	for i, match := range ml.Data {
+		fmt.Printf("%v %v (Rank - %v):\n", i, match.Details.Map.Name, match.Player.Rank)
+	}
 }

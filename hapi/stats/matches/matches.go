@@ -17,15 +17,17 @@ func List() (payloads.MatchList, error) {
 	url := os.Getenv("HAPI_URL")
 
 	// The first step would be identifying a gamertag (gt)
-	gt := "Supertigerman"
+	gt := "Lentilius"
 	mlp, err := json.Marshal(payloads.MatchListPayload{
 		Gamertag: gt,
-		Count:    1,
+		Count:    3,
 		Offset:   0,
 		Mode:     "matchmade"})
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	log.Println(url)
 
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(mlp))
 	if err != nil {
