@@ -28,3 +28,13 @@ func (m *Max) GetMatches() (pl.MatchList, error) {
 
 	return ml, nil
 }
+
+func (m *Max) GetNumMatches() (int64, error) {
+	count, err := matches.Count(m.payload)
+	if err != nil {
+		log.Printf("Max couldn't count the number of matches: %v", err)
+		return count, err
+	}
+
+	return count, nil
+}

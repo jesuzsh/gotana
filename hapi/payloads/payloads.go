@@ -1,10 +1,24 @@
 package payloads
 
+import (
+	"encoding/json"
+	"log"
+)
+
 type MaxPayload struct {
 	Gamertag string `json:"gamertag"`
 	Count    int    `json:"count"`
 	Offset   int    `json:"offset"`
 	Mode     string `json:"mode"`
+}
+
+func (mp *MaxPayload) Marshal() []byte {
+	payload, err := json.Marshal(mp)
+	if err != nil {
+		log.Printf("failed to marshal a MaxPayload", err)
+	}
+
+	return payload
 }
 
 type MatchList struct {
@@ -117,5 +131,6 @@ type MatchList struct {
 	Paging struct {
 		Count  int64 `json:"count"`
 		Offset int64 `json:"offset"`
+		Total  int64 `json:"total"`
 	} `json:"paging"`
 }
