@@ -1,33 +1,29 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
-	"net/http"
+	"os"
 
-	repo "github.com/ccamac01/halo-gofinite/halo-gofinite-service/repo"
+	service "github.com/ccamac01/halo-gofinite/halo-gofinite-service/service"
 )
 
-const STATS_MATCHES_RETRIEVES_ENDPOINT = "https://dev--TestHalo.ccamacho.autocode.gg/"
+const STATS_MATCHES_RETRIEVES_ENDPOINT = "STATS_MATCHES_RETRIEVES_ENDPOINT"
 
+// TODO: add context to pass logger to other methods
 func main() {
-	resp, err := http.Get(STATS_MATCHES_RETRIEVES_ENDPOINT)
-	if err != nil {
-		log.Fatalf("failed to fetch match data")
+	log := service.InitLogger()
+	statsMatchesEndpoint := os.Getenv(STATS_MATCHES_RETRIEVES_ENDPOINT)
+
+	// TODO: add better input sanitization to avoid making unnecessary API calls
+	if statsMatchesEndpoint == "" {
+		log.Fatal("please provide a valid autocode endpoint for retrieving match stats")
 	}
 
-	defer resp.Body.Close()
+	svc := service.NewHaloGofiniteService(statsMatchesEndpoint)
 
-	var matchDetails repo.InfiniteMatchDetailsResult
-	err = json.NewDecoder(resp.Body).Decode(&matchDetails)
+	details, err := svc.GetMatchDetails()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
-	prettyDetails, err := json.MarshalIndent(matchDetails, "", "\t")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(string(prettyDetails))
+	fmt.Println(details)
 }
