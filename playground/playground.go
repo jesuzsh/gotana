@@ -10,10 +10,24 @@ import (
 func main() {
 	// The first step is deciding the gamertag, possibly hook this up to
 	// command-line tooling.
-	gamertag := "Lentilius"
+	gamertag := "Killamannjaro"
 
-	fetchMatches(gamertag)
-	fetchTotalMatches(gamertag)
+	//fetchMatches(gamertag)
+	//fetchTotalMatches(gamertag)
+	fetchAllMatches(gamertag)
+}
+
+func fetchAllMatches(gamertag string) {
+	max := fetchers.Max()
+	max.SetGamer(gamertag)
+
+	matches, err := max.GetAllMatches()
+	if err != nil {
+		log.Printf("unable to get all matches: %v", err)
+	}
+
+	log.Printf("Length of matches: %v, Type: %T\n", len(matches), matches)
+	log.Println(matches)
 }
 
 func fetchMatches(gamertag string) {

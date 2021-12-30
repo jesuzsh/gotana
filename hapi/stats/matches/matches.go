@@ -44,7 +44,7 @@ func List(mp pl.MaxPayload) (pl.MatchList, error) {
 	return ml, nil
 }
 
-func Count(mp pl.MaxPayload) (int64, error) {
+func Count(mp pl.MaxPayload) (int, error) {
 	if mp.Gamertag == "" {
 		return 0, errors.New("empty payload")
 	}
@@ -52,5 +52,5 @@ func Count(mp pl.MaxPayload) (int64, error) {
 	payload := mp.Marshal()
 	ml := matchListRequest(payload)
 
-	return ml.Paging.Total, nil
+	return int(ml.Paging.Total), nil
 }
