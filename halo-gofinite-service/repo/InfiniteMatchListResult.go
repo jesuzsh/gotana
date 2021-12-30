@@ -1,27 +1,6 @@
-package payloads
+package repo
 
-import (
-	"encoding/json"
-	"log"
-)
-
-type MaxPayload struct {
-	Gamertag string `json:"gamertag"`
-	Count    int    `json:"count"`
-	Offset   int    `json:"offset"`
-	Mode     string `json:"mode"`
-}
-
-func (mp *MaxPayload) Marshal() []byte {
-	payload, err := json.Marshal(mp)
-	if err != nil {
-		log.Printf("failed to marshal a MaxPayload", err)
-	}
-
-	return payload
-}
-
-type MatchList struct {
+type InfiniteMatchListResult struct {
 	Additional struct {
 		Gamertag string `json:"gamertag"`
 		Mode     string `json:"mode"`

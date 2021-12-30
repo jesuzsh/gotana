@@ -3,11 +3,27 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
+	service "github.com/ccamac01/halo-gofinite/halo-gofinite-service/service"
 	"go-halo.com/fetchers"
 )
 
+const STATS_MATCHES_RETRIEVES_ENDPOINT = "STATS_MATCHES_RETRIEVES_ENDPOINT"
+
 func main() {
+	log := service.InitLogger()
+	statsMatchesEndpoint := os.Getenv(STATS_MATCHES_RETRIEVES_ENDPOINT)
+
+	svc := services.NewHaloGofiniteService(statsMatchesEndpoint)
+
+	details, err := svc.GetMatchDetails()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	fmt.Println(details)
+
 	// The first step is deciding the gamertag, possibly hook this up to
 	// command-line tooling.
 	gamertag := "Killamannjaro"
