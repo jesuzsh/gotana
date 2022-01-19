@@ -3,8 +3,6 @@ package service
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -57,7 +55,7 @@ func (svc *HaloGofiniteService) GetMatchDetails() (string, error) {
 	return string(prettyDetails), nil
 }
 
-func matchListRequest(payload []byte) repo.InfiniteMatchListResult {
+func (svc *HaloGofiniteService) GetMatchList() (string, error) {
 	url := os.Getenv("HAPI_URL")
 
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(payload))
@@ -66,36 +64,16 @@ func matchListRequest(payload []byte) repo.InfiniteMatchListResult {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	var matchList repo.InfiniteMatchListResult
+	err = json.NewDecoder(resp.Body).Decode(&matchList)
 	if err != nil {
-		log.Printf("unable to read the response body", err)
+		return "", err
 	}
 
-	ml := repo.InfiniteMatchListResult{}
-	json.Unmarshal([]byte(body), &ml)
-
-	return ml
-}
-
-// List returns some matches
-func List(mlp repo.InfininteMatchListPayload) (repo.InfiniteMatchListResult, error) {
-	if mlp.Gamertag == "" {
-		return repo.InfiniteMatchListResult{}, errors.New("empty payload")
+	prettyList, err := json.MarshalIndent(matchList, "", "\t")
+	if err != nil {
+		return "", err
 	}
 
-	payload := mlp.Marshal()
-	ml := matchListRequest(payload)
-
-	return ml, nil
-}
-
-func Count(mlp repo.InfiniteMatchListPayload) (int, error) {
-	if mlp.Gamertag == "" {
-		return 0, errors.New("empty payload")
-	}
-
-	payload := mlp.Marshal()
-	ml := matchListRequest(payload)
-
-	return int(ml.Paging.Total), nil
+	return string(prettyDetails), nil
 }

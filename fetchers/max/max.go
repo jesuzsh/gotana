@@ -42,27 +42,13 @@ func (max *Max) GetAllMatches() ([]pl.MatchList, error) {
 
 	foundMatches := make(chan pl.MatchList, total)
 	for max.Payload.Offset < total {
-		go func() {
-			ml, err := max.GetMatches()
-			if err != nil {
-				log.Printf("error when attempting to get all matches: %v", err)
-			}
-
-			max.Matches = append(max.Matches, ml)
-
-			//foundMatches <- ml
-
-		}()
+		// TODO: Get the matches with the current Offset/Count
 
 		max.Payload.Offset += max.Payload.Count
 
 	}
 
 	return max.Matches, nil
-
-}
-
-func collectMatches(foundMatches <-chan pl.MatchList) {
 
 }
 
