@@ -3,9 +3,9 @@ package service
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"go.uber.org/zap"
 
@@ -13,8 +13,10 @@ import (
 )
 
 type HaloGofiniteService struct {
-	statsMatchesEndpoint string
-	log                  *zap.Logger
+	statsMatchesEndpoint   string
+	StatsMatchListEndpoint string
+	StatsMatchListPayload  *repo.InfiniteMatchListPayload
+	log                    *zap.Logger
 }
 
 func InitLogger() *zap.Logger {
@@ -22,13 +24,24 @@ func InitLogger() *zap.Logger {
 	return logger
 }
 
-func NewHaloGofiniteService(statsMatchesEndpoint string) *HaloGofiniteService {
+func NewHaloGofiniteService(statsMatchesEndpoint string, statsMatchListEndpoint string) *HaloGofiniteService {
 	log := InitLogger()
 
 	return &HaloGofiniteService{
-		statsMatchesEndpoint: statsMatchesEndpoint,
-		log:                  log,
+		statsMatchesEndpoint:   statsMatchesEndpoint,
+		StatsMatchListEndpoint: statsMatchListEndpoint,
+		StatsMatchListPayload: &repo.InfiniteMatchListPayload{
+			Gamertag: "",
+			Count:    3,
+			Offset:   0,
+			Mode:     "matchmade",
+		},
+		log: log,
 	}
+}
+
+func (svc *HaloGofiniteService) SetGamer(gamertag string) {
+	svc.StatsMatchListPayload.Gamertag = gamertag
 }
 
 func (svc *HaloGofiniteService) GetMatchDetails() (string, error) {
@@ -56,24 +69,28 @@ func (svc *HaloGofiniteService) GetMatchDetails() (string, error) {
 }
 
 func (svc *HaloGofiniteService) GetMatchList() (string, error) {
-	url := os.Getenv("HAPI_URL")
-
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(payload))
+	resp, err := http.Post(
+		svc.StatsMatchListEndpoint,
+		"application/json",
+		bytes.NewBuffer(svc.StatsMatchListPayload.Marshal()),
+	)
 	if err != nil {
 		log.Printf("unable to obtain MatchList", err)
 	}
 	defer resp.Body.Close()
 
 	var matchList repo.InfiniteMatchListResult
+	fmt.Println("About to decode match list.")
 	err = json.NewDecoder(resp.Body).Decode(&matchList)
 	if err != nil {
 		return "", err
 	}
+	fmt.Println("Completed the decode")
 
 	prettyList, err := json.MarshalIndent(matchList, "", "\t")
 	if err != nil {
 		return "", err
 	}
 
-	return string(prettyDetails), nil
+	return string(prettyList), nil
 }

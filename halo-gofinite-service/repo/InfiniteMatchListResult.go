@@ -67,7 +67,7 @@ type InfiniteMatchListResult struct {
 						Dealt int64 `json:"dealt"`
 						Taken int64 `json:"taken"`
 					} `json:"damage"`
-					Kda    int64   `json:"kda"`
+					Kda    float64 `json:"kda"`
 					Kdr    float64 `json:"kdr"`
 					Rounds struct {
 						Lost int64 `json:"lost"`
