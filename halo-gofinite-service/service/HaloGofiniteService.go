@@ -3,8 +3,7 @@ package service
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
-	"log"
+	"io/ioutil"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -17,6 +16,7 @@ type HaloGofiniteService struct {
 	StatsMatchListEndpoint string
 	StatsMatchListPayload  *repo.InfiniteMatchListPayload
 	log                    *zap.Logger
+	Buffer                 []uint8
 }
 
 func InitLogger() *zap.Logger {
@@ -36,7 +36,8 @@ func NewHaloGofiniteService(statsMatchesEndpoint string, statsMatchListEndpoint 
 			Offset:   0,
 			Mode:     "matchmade",
 		},
-		log: log,
+		log:    log,
+		Buffer: []uint8{},
 	}
 }
 
@@ -69,28 +70,49 @@ func (svc *HaloGofiniteService) GetMatchDetails() (string, error) {
 }
 
 func (svc *HaloGofiniteService) GetMatchList() (string, error) {
+	log := svc.log
+	if svc.StatsMatchListPayload.Gamertag == "" {
+		log.Fatal("No gamertag specified. Unable to get MatchList.")
+	}
+
 	resp, err := http.Post(
 		svc.StatsMatchListEndpoint,
 		"application/json",
 		bytes.NewBuffer(svc.StatsMatchListPayload.Marshal()),
 	)
 	if err != nil {
-		log.Printf("unable to obtain MatchList", err)
+		log.Error("unable to obtain MatchList")
+		return "", err
 	}
 	defer resp.Body.Close()
 
 	var matchList repo.InfiniteMatchListResult
-	fmt.Println("About to decode match list.")
 	err = json.NewDecoder(resp.Body).Decode(&matchList)
 	if err != nil {
 		return "", err
 	}
-	fmt.Println("Completed the decode")
 
 	prettyList, err := json.MarshalIndent(matchList, "", "\t")
 	if err != nil {
 		return "", err
 	}
+	// TODO temporary way to access the data
+	svc.Buffer = prettyList
 
 	return string(prettyList), nil
+}
+
+func (svc *HaloGofiniteService) WriteMatchList(filename string) (bool, error) {
+	log := svc.log
+	if len(svc.Buffer) == 0 {
+		log.Fatal("Empty buffer. Nothing to write.")
+	}
+
+	err := ioutil.WriteFile(filename, svc.Buffer, 0644)
+	if err != nil {
+		log.Error("unable to save json file")
+		return false, err
+	}
+
+	return true, nil
 }
