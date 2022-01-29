@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	service "github.com/ccamac01/halo-gofinite/halo-gofinite-service/service"
@@ -17,24 +16,27 @@ func main() {
 	statsMatchListEndpoint := os.Getenv(STATS_MATCH_LIST_ENDPOINT)
 
 	// TODO: add better input sanitization to avoid making unnecessary API calls
-	if statsMatchesEndpoint == "" {
+	if statsMatchesEndpoint == "" || statsMatchListEndpoint == "" {
 		log.Fatal("please provide a valid autocode endpoint for retrieving match stats")
 	}
 
 	svc := service.NewHaloGofiniteService(statsMatchesEndpoint, statsMatchListEndpoint)
 
-	details, err := svc.GetMatchDetails()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	fmt.Println("DETAILS")
-	fmt.Println(details)
+	//details, err := svc.GetMatchDetails()
+	//if err != nil {
+	//log.Fatal(err.Error())
+	//}
+	//fmt.Println("DETAILS")
+	//fmt.Println(details)
 
 	svc.SetGamer("Lentilius")
-	matchListDetails, err := svc.GetMatchList()
+	_, err := svc.GetMatchList()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	fmt.Println("MATCH LIST")
-	fmt.Println(matchListDetails)
+
+	_, err = svc.WriteMatchList("./temp.json")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }

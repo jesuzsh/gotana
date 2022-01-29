@@ -1,0 +1,341 @@
+{
+	"additional": {
+		"gamertag": "Lentilius",
+		"mode": "matchmade"
+	},
+	"count": 3,
+	"data": [
+		{
+			"details": {
+				"category": {
+					"asset": {
+						"id": "751bcc9d-aace-45a1-8d71-358f0bc89f7e",
+						"thumbnail_url": "https://assets.halo.autocode.gg/images/infinite/ugcgamevariants/oddball.png",
+						"version": "29f36248-0181-44ba-96a0-3c3b9b924085"
+					},
+					"name": "Oddball"
+				},
+				"map": {
+					"asset": {
+						"id": "8420410b-044d-44d7-80b6-98a766c8c39f",
+						"thumbnail_url": "https://assets.halo.autocode.gg/images/infinite/maps/recharge.png",
+						"version": "8ed490af-c0e1-4e0a-b610-50aae3dc053c"
+					},
+					"name": "Recharge"
+				},
+				"playlist": {
+					"asset": {
+						"id": "f7eb8c71-fedb-4696-8c0f-96025e285ffd",
+						"thumbnail_url": "",
+						"version": "8003d86f-a331-4c16-b8e4-28d3892a592a"
+					},
+					"name": "",
+					"properties": {
+						"input": "",
+						"queue": "",
+						"ranked": false
+					}
+				}
+			},
+			"duration": {
+				"human": "00h 16m 50s",
+				"seconds": 1010
+			},
+			"experience": "arena",
+			"id": "2371aaf7-5515-40e7-834b-93e902b9d539",
+			"played_at": "2022-01-29T05:39:41.832Z",
+			"player": {
+				"outcome": "loss",
+				"rank": 7,
+				"stats": {
+					"core": {
+						"breakdowns": {
+							"assists": {
+								"callouts": 0,
+								"driver": 0,
+								"emp": 0
+							},
+							"kills": {
+								"grenades": 2,
+								"headshots": 10,
+								"melee": 9,
+								"power_weapons": 1
+							}
+						},
+						"damage": {
+							"dealt": 7044,
+							"taken": 6687
+						},
+						"kda": 7.66,
+						"kdr": 1.2272727272727273,
+						"rounds": {
+							"lost": 1,
+							"tied": 1,
+							"won": 1
+						},
+						"score": 3295,
+						"shots": {
+							"accuracy": 26.156069364161848,
+							"fired": 692,
+							"landed": 181,
+							"missed": 511
+						},
+						"summary": {
+							"assists": 8,
+							"betrayals": 0,
+							"deaths": 22,
+							"kills": 27,
+							"medals": 11,
+							"suicides": 0,
+							"vehicles": {
+								"destroys": 0,
+								"hijacks": 0
+							}
+						}
+					},
+					"mode": {
+						"oddballs": {
+							"controls": 1,
+							"grabs": 0,
+							"kills": {
+								"as": {
+									"carrier": 0
+								},
+								"carriers": 3
+							},
+							"possession": {
+								"durations": {
+									"longest": {
+										"human": "00h 00m 08s",
+										"seconds": 8
+									},
+									"total": {
+										"human": "00h 00m 29s",
+										"seconds": 29
+									}
+								},
+								"ticks": 25
+							}
+						}
+					}
+				},
+				"team": {
+					"emblem_url": "https://assets.halo.autocode.gg/images/infinite/teams/cobra.png",
+					"id": 1,
+					"name": "Cobra"
+				}
+			},
+			"teams": {
+				"enabled": true,
+				"scoring": true
+			}
+		},
+		{
+			"details": {
+				"category": {
+					"asset": {
+						"id": "c2d20d44-8606-4669-b894-afae15b3524f",
+						"thumbnail_url": "https://assets.halo.autocode.gg/images/infinite/ugcgamevariants/slayer.png",
+						"version": "9eee25fe-39db-493f-ab0d-d95403df66b8"
+					},
+					"name": "Slayer"
+				},
+				"map": {
+					"asset": {
+						"id": "298d5036-cd43-47b3-a4bd-31e127566593",
+						"thumbnail_url": "https://assets.halo.autocode.gg/images/infinite/maps/bazaar.png",
+						"version": "bca803f0-4447-4a5a-aef4-b31e4be77076"
+					},
+					"name": "Bazaar"
+				},
+				"playlist": {
+					"asset": {
+						"id": "f7eb8c71-fedb-4696-8c0f-96025e285ffd",
+						"thumbnail_url": "",
+						"version": "8003d86f-a331-4c16-b8e4-28d3892a592a"
+					},
+					"name": "",
+					"properties": {
+						"input": "",
+						"queue": "",
+						"ranked": false
+					}
+				}
+			},
+			"duration": {
+				"human": "00h 10m 46s",
+				"seconds": 646
+			},
+			"experience": "arena",
+			"id": "3e92e6b2-451e-444e-b79f-dafc8d82d79d",
+			"played_at": "2022-01-29T05:24:24.744Z",
+			"player": {
+				"outcome": "win",
+				"rank": 3,
+				"stats": {
+					"core": {
+						"breakdowns": {
+							"assists": {
+								"callouts": 0,
+								"driver": 0,
+								"emp": 0
+							},
+							"kills": {
+								"grenades": 0,
+								"headshots": 7,
+								"melee": 1,
+								"power_weapons": 3
+							}
+						},
+						"damage": {
+							"dealt": 3497,
+							"taken": 4117
+						},
+						"kda": 0.66,
+						"kdr": 0.9166666666666666,
+						"rounds": {
+							"lost": 0,
+							"tied": 0,
+							"won": 1
+						},
+						"score": 1350,
+						"shots": {
+							"accuracy": 30.29045643153527,
+							"fired": 482,
+							"landed": 146,
+							"missed": 336
+						},
+						"summary": {
+							"assists": 5,
+							"betrayals": 0,
+							"deaths": 12,
+							"kills": 11,
+							"medals": 4,
+							"suicides": 0,
+							"vehicles": {
+								"destroys": 0,
+								"hijacks": 0
+							}
+						}
+					},
+					"mode": null
+				},
+				"team": {
+					"emblem_url": "https://assets.halo.autocode.gg/images/infinite/teams/eagle.png",
+					"id": 0,
+					"name": "Eagle"
+				}
+			},
+			"teams": {
+				"enabled": true,
+				"scoring": true
+			}
+		},
+		{
+			"details": {
+				"category": {
+					"asset": {
+						"id": "c2d20d44-8606-4669-b894-afae15b3524f",
+						"thumbnail_url": "https://assets.halo.autocode.gg/images/infinite/ugcgamevariants/slayer.png",
+						"version": "9eee25fe-39db-493f-ab0d-d95403df66b8"
+					},
+					"name": "Slayer"
+				},
+				"map": {
+					"asset": {
+						"id": "b6aca0c7-8ba7-4066-bf91-693571374c3c",
+						"thumbnail_url": "https://assets.halo.autocode.gg/images/infinite/maps/live-fire.png",
+						"version": "c63ee410-784e-46ae-911e-ab7bc35933b1"
+					},
+					"name": "Live Fire"
+				},
+				"playlist": {
+					"asset": {
+						"id": "f7eb8c71-fedb-4696-8c0f-96025e285ffd",
+						"thumbnail_url": "",
+						"version": "8003d86f-a331-4c16-b8e4-28d3892a592a"
+					},
+					"name": "",
+					"properties": {
+						"input": "",
+						"queue": "",
+						"ranked": false
+					}
+				}
+			},
+			"duration": {
+				"human": "00h 09m 20s",
+				"seconds": 560
+			},
+			"experience": "arena",
+			"id": "494ff6cd-c59d-47d8-99e6-30b64a8664fd",
+			"played_at": "2022-01-29T05:08:15.747Z",
+			"player": {
+				"outcome": "loss",
+				"rank": 6,
+				"stats": {
+					"core": {
+						"breakdowns": {
+							"assists": {
+								"callouts": 0,
+								"driver": 0,
+								"emp": 0
+							},
+							"kills": {
+								"grenades": 0,
+								"headshots": 10,
+								"melee": 3,
+								"power_weapons": 0
+							}
+						},
+						"damage": {
+							"dealt": 3982,
+							"taken": 3325
+						},
+						"kda": 5.33,
+						"kdr": 1.5555555555555556,
+						"rounds": {
+							"lost": 1,
+							"tied": 0,
+							"won": 0
+						},
+						"score": 1450,
+						"shots": {
+							"accuracy": 40.40632054176072,
+							"fired": 443,
+							"landed": 179,
+							"missed": 264
+						},
+						"summary": {
+							"assists": 1,
+							"betrayals": 0,
+							"deaths": 9,
+							"kills": 14,
+							"medals": 3,
+							"suicides": 0,
+							"vehicles": {
+								"destroys": 0,
+								"hijacks": 0
+							}
+						}
+					},
+					"mode": null
+				},
+				"team": {
+					"emblem_url": "https://assets.halo.autocode.gg/images/infinite/teams/cobra.png",
+					"id": 1,
+					"name": "Cobra"
+				}
+			},
+			"teams": {
+				"enabled": true,
+				"scoring": true
+			}
+		}
+	],
+	"paging": {
+		"count": 3,
+		"offset": 0,
+		"total": 764
+	}
+}
