@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	service "github.com/ccamac01/halo-gofinite/halo-gofinite-service/service"
@@ -21,19 +22,12 @@ func main() {
 	}
 
 	svc := service.NewHaloGofiniteService(statsMatchesEndpoint, statsMatchListEndpoint)
-
-	//details, err := svc.GetMatchDetails()
-	//if err != nil {
-	//log.Fatal(err.Error())
-	//}
-	//fmt.Println("DETAILS")
-	//fmt.Println(details)
-
 	svc.SetGamer("Lentilius")
-	_, err := svc.GetMatchList()
+	prettyList, err := svc.GetMatchList()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	fmt.Println(prettyList)
 
 	_, err = svc.WriteMatchList("./temp.json")
 	if err != nil {

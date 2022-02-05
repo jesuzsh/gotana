@@ -69,7 +69,7 @@ func (svc *HaloGofiniteService) GetMatchDetails() (string, error) {
 	return string(prettyDetails), nil
 }
 
-func (svc *HaloGofiniteService) GetMatchList() (string, error) {
+func (svc *HaloGofiniteService) GetMatchList() (repo.InfiniteMatchListResult, error) {
 	log := svc.log
 	if svc.StatsMatchListPayload.Gamertag == "" {
 		log.Fatal("No gamertag specified. Unable to get MatchList.")
@@ -82,24 +82,23 @@ func (svc *HaloGofiniteService) GetMatchList() (string, error) {
 	)
 	if err != nil {
 		log.Error("unable to obtain MatchList")
-		return "", err
+		return repo.InfiniteMatchListResult{}, err
 	}
 	defer resp.Body.Close()
 
 	var matchList repo.InfiniteMatchListResult
 	err = json.NewDecoder(resp.Body).Decode(&matchList)
 	if err != nil {
-		return "", err
+		return repo.InfiniteMatchListResult{}, err
 	}
 
-	prettyList, err := json.MarshalIndent(matchList, "", "\t")
-	if err != nil {
-		return "", err
-	}
 	// TODO temporary way to access the data
-	svc.Buffer = prettyList
+	svc.Buffer, err = json.MarshalIndent(matchList, "", "\t")
+	if err != nil {
+		return repo.InfiniteMatchListResult{}, err
+	}
 
-	return string(prettyList), nil
+	return matchList, nil
 }
 
 func (svc *HaloGofiniteService) WriteMatchList(filename string) (bool, error) {
