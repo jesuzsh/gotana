@@ -3,7 +3,9 @@ package service
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -31,18 +33,14 @@ func NewHaloGofiniteService(statsMatchesEndpoint string, statsMatchListEndpoint 
 		statsMatchesEndpoint:   statsMatchesEndpoint,
 		StatsMatchListEndpoint: statsMatchListEndpoint,
 		StatsMatchListPayload: &repo.InfiniteMatchListPayload{
-			Gamertag: "",
-			Count:    3,
+			Gamertag: "Lentilius",
+			Count:    25,
 			Offset:   0,
 			Mode:     "matchmade",
 		},
 		log:    log,
 		Buffer: []uint8{},
 	}
-}
-
-func (svc *HaloGofiniteService) SetGamer(gamertag string) {
-	svc.StatsMatchListPayload.Gamertag = gamertag
 }
 
 func (svc *HaloGofiniteService) GetMatchDetails() (string, error) {
@@ -99,6 +97,35 @@ func (svc *HaloGofiniteService) GetMatchList() (repo.InfiniteMatchListResult, er
 	}
 
 	return matchList, nil
+}
+
+func (svc *HaloGofiniteService) TotalMatches() (int64, error) {
+	svc.StatsMatchListPayload.Count = 1
+
+	mlr, _ := svc.GetMatchList()
+
+	return mlr.Paging.Total, nil
+}
+
+// TODO: Implement this function in go routines.
+func (svc *HaloGofiniteService) GetAllMatchList() ([]repo.InfiniteMatchListResult, error) {
+	var mlrList []repo.InfinitMatchListResult
+	pendingMatches, _ := svc.TotalMatches()
+
+	for pendingMatches > 0 {
+		fmt.Printf("Pending matches: %v\n", pendingMatches)
+		svc.StatsMatchListPayload.Count = 25
+		mlr, err := svc.GetMatchList()
+		if err != nil {
+			log.Fatal(err)
+		}
+		mlrList = append(mlrList, mlr)
+
+		pendingMatches -= 25
+		svc.StatsMatchListPayload.Offset += 25
+	}
+
+	return mlrList, nil
 }
 
 func (svc *HaloGofiniteService) WriteMatchList(filename string) (bool, error) {

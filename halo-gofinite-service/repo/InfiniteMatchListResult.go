@@ -1,5 +1,7 @@
 package repo
 
+import "fmt"
+
 type InfiniteMatchListResult struct {
 	Additional struct {
 		Gamertag string `json:"gamertag"`
@@ -112,4 +114,11 @@ type InfiniteMatchListResult struct {
 		Offset int64 `json:"offset"`
 		Total  int64 `json:"total"`
 	} `json:"paging"`
+}
+
+func (mlr InfiniteMatchListResult) ListMatches() {
+	for i, elem := range mlr.Data {
+		fmt.Println(i, elem.Id)
+	}
+	return
 }
