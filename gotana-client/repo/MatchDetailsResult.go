@@ -1,7 +1,7 @@
 package repo
 
 // Source: https://autocode.com/lib/halo/infinite/#stats-matches-list
-type InfiniteMatchDetailsResult struct {
+type MatchDetailsResult struct {
 	Data struct {
 		Details struct {
 			Category struct {
