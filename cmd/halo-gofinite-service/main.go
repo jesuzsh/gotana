@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	service "github.com/ccamac01/halo-gofinite/halo-gofinite-service/service"
@@ -23,5 +24,6 @@ func main() {
 	svc := service.NewHaloGofiniteService(statsMatchesEndpoint, statsMatchListEndpoint)
 
 	svc.GetAllMatchList()
+	fmt.Println("Done.")
 
 }

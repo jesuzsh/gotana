@@ -2,7 +2,7 @@ package repo
 
 import "fmt"
 
-type InfiniteMatchListResult struct {
+type MatchListResult struct {
 	Additional struct {
 		Gamertag string `json:"gamertag"`
 		Mode     string `json:"mode"`
@@ -20,7 +20,7 @@ type InfiniteMatchListResult struct {
 			} `json:"category"`
 			Map struct {
 				Asset struct {
-					Id           string `json:"id"`
+					ID           string `json:"id"`
 					ThumbnailUrl string `json:"thumbnail_url"`
 					Version      string `json:"version"`
 				} `json:"asset"`
@@ -45,7 +45,7 @@ type InfiniteMatchListResult struct {
 			Seconds int64  `json:"seconds"`
 		} `json:"duration"`
 		Experience string `json:"experience"`
-		Id         string `json:"id"`
+		ID         string `json:"id"`
 		PlayedAt   string `json:"played_at"`
 		Player     struct {
 			Outcome string `json:"outcome"`
@@ -116,9 +116,9 @@ type InfiniteMatchListResult struct {
 	} `json:"paging"`
 }
 
-func (mlr InfiniteMatchListResult) ListMatches() {
+func (mlr MatchListResult) ListMatches() {
 	for i, elem := range mlr.Data {
-		fmt.Println(i, elem.Id)
+		fmt.Println(i, elem.ID)
 	}
 	return
 }
