@@ -10,11 +10,11 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/ccamac01/halo-gofinite/halo-gofinite-service/repo"
+	"github.com/jesuzsh/gotana/gotana-client/repo"
 )
 
-type HaloGofiniteService struct {
-	statsMatchesEndpoint   string
+type Client struct {
+	StatsMatchesEndpoint   string
 	StatsMatchListEndpoint string
 	log                    *zap.Logger
 	Buffer                 []uint8
@@ -25,20 +25,20 @@ func InitLogger() *zap.Logger {
 	return logger
 }
 
-func NewHaloGofiniteService(statsMatchesEndpoint string, statsMatchListEndpoint string) *HaloGofiniteService {
+func NewClient(statsMatchesEndpoint string, statsMatchListEndpoint string) *Client {
 	log := InitLogger()
 
-	return &HaloGofiniteService{
-		statsMatchesEndpoint:   statsMatchesEndpoint,
+	return &Client{
+		StatsMatchesEndpoint:   statsMatchesEndpoint,
 		StatsMatchListEndpoint: statsMatchListEndpoint,
 		log:                    log,
 		Buffer:                 []uint8{},
 	}
 }
 
-func (svc *HaloGofiniteService) GetMatchDetails() (string, error) {
-	resp, err := http.Get(svc.statsMatchesEndpoint)
-	log := svc.log
+func (clt *Client) GetMatchDetails() (string, error) {
+	resp, err := http.Get(clt.StatsMatchesEndpoint)
+	log := clt.log
 	if err != nil {
 		log.Error("failed to fetch match data")
 		return "", err
@@ -46,7 +46,7 @@ func (svc *HaloGofiniteService) GetMatchDetails() (string, error) {
 
 	defer resp.Body.Close()
 
-	var matchDetails repo.InfiniteMatchDetailsResult
+	var matchDetails repo.MatchDetailsResult
 	err = json.NewDecoder(resp.Body).Decode(&matchDetails)
 	if err != nil {
 		return "", err
@@ -60,14 +60,14 @@ func (svc *HaloGofiniteService) GetMatchDetails() (string, error) {
 	return string(prettyDetails), nil
 }
 
-func (svc *HaloGofiniteService) GetMatchList(payload repo.MatchListPayload) (repo.MatchListResult, error) {
-	log := svc.log
+func (clt *Client) GetMatchList(payload repo.MatchListPayload) (repo.MatchListResult, error) {
+	log := clt.log
 	if payload.Gamertag == "" {
 		log.Fatal("No gamertag specified. Unable to get MatchList.")
 	}
 
 	resp, err := http.Post(
-		svc.StatsMatchListEndpoint,
+		clt.StatsMatchListEndpoint,
 		"application/json",
 		bytes.NewBuffer(payload.Marshal()),
 	)
@@ -86,7 +86,7 @@ func (svc *HaloGofiniteService) GetMatchList(payload repo.MatchListPayload) (rep
 	return matchList, nil
 }
 
-func (svc *HaloGofiniteService) TotalMatches() (int64, error) {
+func (clt *Client) TotalMatches() (int64, error) {
 	payload := repo.MatchListPayload{
 		Gamertag: "Lentilius",
 		Count:    1,
@@ -94,7 +94,7 @@ func (svc *HaloGofiniteService) TotalMatches() (int64, error) {
 		Mode:     "matchmade",
 	}
 
-	mlr, err := svc.GetMatchList(payload)
+	mlr, err := clt.GetMatchList(payload)
 	if err != nil {
 		return 0, nil
 	}
@@ -102,8 +102,8 @@ func (svc *HaloGofiniteService) TotalMatches() (int64, error) {
 	return mlr.Paging.Total, nil
 }
 
-func (svc *HaloGofiniteService) GetAllMatchList() {
-	//pendingMatches, _ := svc.TotalMatches()
+func (clt *Client) GetAllMatchList() {
+	//pendingMatches, _ := clt.TotalMatches()
 	pendingMatches := 50
 
 	var wg sync.WaitGroup
@@ -121,7 +121,7 @@ func (svc *HaloGofiniteService) GetAllMatchList() {
 		payload.Count = 25
 		go func() {
 			defer wg.Done()
-			mlr, err := svc.GetMatchList(payload)
+			mlr, err := clt.GetMatchList(payload)
 			if err != nil {
 				log.Print(err)
 				return
@@ -146,13 +146,13 @@ func (svc *HaloGofiniteService) GetAllMatchList() {
 	return
 }
 
-func (svc *HaloGofiniteService) WriteMatchList(filename string) (bool, error) {
-	log := svc.log
-	if len(svc.Buffer) == 0 {
+func (clt *Client) WriteMatchList(filename string) (bool, error) {
+	log := clt.log
+	if len(clt.Buffer) == 0 {
 		log.Fatal("Empty buffer. Nothing to write.")
 	}
 
-	err := ioutil.WriteFile(filename, svc.Buffer, 0644)
+	err := ioutil.WriteFile(filename, clt.Buffer, 0644)
 	if err != nil {
 		log.Error("unable to save json file")
 		return false, err

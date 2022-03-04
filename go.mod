@@ -1,4 +1,4 @@
-module github.com/ccamac01/halo-gofinite
+module github.com/jesuzsh/gotana
 
 go 1.17
 
