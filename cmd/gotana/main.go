@@ -21,7 +21,7 @@ func main() {
 		log.Fatal("please provide a valid autocode endpoint for retrieving match stats")
 	}
 
-	clt := client.NewHaloGofiniteService(statsMatchesEndpoint, statsMatchListEndpoint)
+	clt := client.NewClient(statsMatchesEndpoint, statsMatchListEndpoint)
 
 	clt.GetAllMatchList()
 	fmt.Println("Done.")
