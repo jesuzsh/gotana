@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	client "github.com/jesuzsh/gotana/gotana-client/client"
@@ -23,7 +22,5 @@ func main() {
 
 	clt := client.NewClient(statsMatchesEndpoint, statsMatchListEndpoint)
 
-	clt.GetAllMatchList()
-	fmt.Println("Done.")
-
+	clt.ProcessMatches()
 }

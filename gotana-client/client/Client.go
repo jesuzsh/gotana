@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -86,7 +87,7 @@ func (clt *Client) GetMatchList(payload repo.MatchListPayload) (repo.MatchListRe
 	return matchList, nil
 }
 
-func (clt *Client) TotalMatches() (int64, error) {
+func (clt *Client) TotalMatches() (int, error) {
 	payload := repo.MatchListPayload{
 		Gamertag: "Lentilius",
 		Count:    1,
@@ -99,16 +100,11 @@ func (clt *Client) TotalMatches() (int64, error) {
 		return 0, nil
 	}
 
-	return mlr.Paging.Total, nil
+	return int(mlr.Paging.Total), nil
 }
 
-func (clt *Client) GetAllMatchList() {
-	//pendingMatches, _ := clt.TotalMatches()
-	pendingMatches := 50
-
+func (clt *Client) GetAllMatchList(out chan repo.MatchListResult, pendingMatches int) {
 	var wg sync.WaitGroup
-	responses := make(chan repo.MatchListResult, pendingMatches)
-
 	payload := repo.MatchListPayload{
 		Gamertag: "Lentilius",
 		Count:    25,
@@ -118,28 +114,43 @@ func (clt *Client) GetAllMatchList() {
 
 	for pendingMatches > 0 {
 		wg.Add(1)
-		payload.Count = 25
-		go func() {
+		go func(p repo.MatchListPayload) {
 			defer wg.Done()
-			mlr, err := clt.GetMatchList(payload)
+			mlr, err := clt.GetMatchList(p)
 			if err != nil {
+				fmt.Println("there is an error")
 				log.Print(err)
 				return
 			}
 
-			responses <- mlr
-		}()
+			out <- mlr
+		}(payload)
 
 		pendingMatches -= 25
 		payload.Offset += 25
+
+		if pendingMatches < 25 {
+			payload.Count = pendingMatches
+		}
+
 	}
 
 	go func() {
 		wg.Wait()
-		close(responses)
+		close(out)
 	}()
 
-	for mlr := range responses {
+	return
+}
+
+func (clt *Client) ProcessMatches() {
+	totalMatches, _ := clt.TotalMatches()
+
+	results := make(chan repo.MatchListResult, totalMatches)
+
+	clt.GetAllMatchList(results, totalMatches)
+
+	for mlr := range results {
 		mlr.ListMatches()
 	}
 
