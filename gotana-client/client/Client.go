@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -103,7 +104,9 @@ func (clt *Client) TotalMatches() (int, error) {
 	return int(mlr.Paging.Total), nil
 }
 
-func (clt *Client) GetAllMatchList(out chan repo.MatchListResult, pendingMatches int) {
+func (clt *Client) GetAllMatchList(out chan<- repo.MatchListResult, pendingMatches int) {
+	// TODO: remove
+	//pendingMatches = 25
 	var wg sync.WaitGroup
 	payload := repo.MatchListPayload{
 		Gamertag: "Lentilius",
@@ -143,16 +146,64 @@ func (clt *Client) GetAllMatchList(out chan repo.MatchListResult, pendingMatches
 	return
 }
 
+func (clt *Client) ZipResults(out chan<- repo.ZipPayload, in <-chan repo.MatchListResult) {
+	var wg sync.WaitGroup
+
+	for mlr := range in {
+		wg.Add(1)
+		go func(result repo.MatchListResult) {
+			defer wg.Done()
+			result.ListMatches()
+
+			fileJSON, err := json.Marshal(result)
+			if err != nil {
+				log.Fatal("json.Marshal:", err)
+			}
+
+			var fileGZ bytes.Buffer
+			zipper := gzip.NewWriter(&fileGZ)
+
+			_, err = zipper.Write(fileJSON)
+			if err != nil {
+				log.Fatalf("zipper.Write ERRR: %+v", err)
+			}
+			zipper.Close()
+
+			zp := repo.ZipPayload{
+				ID:  result.Data.ID,
+				Zip: fileGZ,
+			}
+			out <- zp
+		}(mlr)
+	}
+
+	go func() {
+		wg.Wait()
+		close(out)
+	}()
+
+	return
+}
+
+func (clt *Client) Persister(in <-chan repo.ZipPayload) {
+	for z := range in {
+		// TODO
+		fmt.Println("==========doing something with a zipfile============")
+		fmt.Println(z)
+	}
+}
+
 func (clt *Client) ProcessMatches() {
 	totalMatches, _ := clt.TotalMatches()
 
-	results := make(chan repo.MatchListResult, totalMatches)
+	results := make(chan repo.MatchListResult, totalMatches/25)
+	zippedResults := make(chan repo.ZipPayload, totalMatches/25)
 
-	clt.GetAllMatchList(results, totalMatches)
-
-	for mlr := range results {
-		mlr.ListMatches()
-	}
+	fmt.Println("GetAllMatchList")
+	go clt.GetAllMatchList(results, totalMatches)
+	fmt.Println("ZipResults")
+	go clt.ZipResults(zippedResults, results)
+	clt.Persister(zippedResults)
 
 	return
 }
