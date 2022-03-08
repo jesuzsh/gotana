@@ -111,7 +111,7 @@ type MatchListResult struct {
 	} `json:"data"`
 	Paging struct {
 		Count  int64 `json:"count"`
-		Offset int64 `json:"offset"`
+		Offset int   `json:"offset"`
 		Total  int64 `json:"total"`
 	} `json:"paging"`
 }

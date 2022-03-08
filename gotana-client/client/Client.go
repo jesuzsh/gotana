@@ -8,14 +8,20 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 	"sync"
 
 	"go.uber.org/zap"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/jesuzsh/gotana/gotana-client/repo"
 )
 
 type Client struct {
+	Target                 string
 	StatsMatchesEndpoint   string
 	StatsMatchListEndpoint string
 	log                    *zap.Logger
@@ -27,10 +33,11 @@ func InitLogger() *zap.Logger {
 	return logger
 }
 
-func NewClient(statsMatchesEndpoint string, statsMatchListEndpoint string) *Client {
+func NewClient(target string, statsMatchesEndpoint string, statsMatchListEndpoint string) *Client {
 	log := InitLogger()
 
 	return &Client{
+		Target:                 target,
 		StatsMatchesEndpoint:   statsMatchesEndpoint,
 		StatsMatchListEndpoint: statsMatchListEndpoint,
 		log:                    log,
@@ -90,7 +97,7 @@ func (clt *Client) GetMatchList(payload repo.MatchListPayload) (repo.MatchListRe
 
 func (clt *Client) TotalMatches() (int, error) {
 	payload := repo.MatchListPayload{
-		Gamertag: "Lentilius",
+		Gamertag: clt.Target,
 		Count:    1,
 		Offset:   0,
 		Mode:     "matchmade",
@@ -109,7 +116,7 @@ func (clt *Client) GetAllMatchList(out chan<- repo.MatchListResult, pendingMatch
 	//pendingMatches = 25
 	var wg sync.WaitGroup
 	payload := repo.MatchListPayload{
-		Gamertag: "Lentilius",
+		Gamertag: clt.Target,
 		Count:    25,
 		Offset:   0,
 		Mode:     "matchmade",
@@ -153,7 +160,7 @@ func (clt *Client) ZipResults(out chan<- repo.ZipPayload, in <-chan repo.MatchLi
 		wg.Add(1)
 		go func(result repo.MatchListResult) {
 			defer wg.Done()
-			result.ListMatches()
+			//result.ListMatches()
 
 			fileJSON, err := json.Marshal(result)
 			if err != nil {
@@ -170,7 +177,7 @@ func (clt *Client) ZipResults(out chan<- repo.ZipPayload, in <-chan repo.MatchLi
 			zipper.Close()
 
 			zp := repo.ZipPayload{
-				ID:  result.Data.ID,
+				ID:  strconv.Itoa(result.Paging.Offset),
 				Zip: fileGZ,
 			}
 			out <- zp
@@ -186,11 +193,49 @@ func (clt *Client) ZipResults(out chan<- repo.ZipPayload, in <-chan repo.MatchLi
 }
 
 func (clt *Client) Persister(in <-chan repo.ZipPayload) {
+	var wg sync.WaitGroup
+	sess := session.Must(session.NewSession(&aws.Config{
+		Region: aws.String("us-east-2")},
+	))
+	uploader := s3manager.NewUploader(sess)
+
 	for z := range in {
-		// TODO
-		fmt.Println("==========doing something with a zipfile============")
-		fmt.Println(z)
+		wg.Add(1)
+		go func(zip repo.ZipPayload) {
+			defer wg.Done()
+			file, err := ioutil.TempFile("", "prefix")
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer os.Remove(file.Name())
+
+			err = ioutil.WriteFile(file.Name(), []byte(zip.Zip.String()), 0644)
+			if err != nil {
+				fmt.Printf("WriteFileGZ ERROR: %+v", err)
+			}
+
+			fmt.Println("uploadiing to s3")
+			result, err := uploader.Upload(&s3manager.UploadInput{
+				Bucket: aws.String("gotana"),
+				Key:    aws.String(clt.Target + "/" + zip.ID + ".json.gz"),
+				Body:   file,
+			})
+			if err != nil {
+				fmt.Printf("%+v", err)
+				fmt.Errorf("failed to upload file, %v", err)
+				return
+			}
+
+			fmt.Printf("file uploaded to, %s\n", aws.String(result.Location))
+
+		}(z)
 	}
+
+	go func() {
+		wg.Wait()
+	}()
+
+	return
 }
 
 func (clt *Client) ProcessMatches() {
@@ -199,11 +244,11 @@ func (clt *Client) ProcessMatches() {
 	results := make(chan repo.MatchListResult, totalMatches/25)
 	zippedResults := make(chan repo.ZipPayload, totalMatches/25)
 
-	fmt.Println("GetAllMatchList")
 	go clt.GetAllMatchList(results, totalMatches)
-	fmt.Println("ZipResults")
 	go clt.ZipResults(zippedResults, results)
 	clt.Persister(zippedResults)
+
+	fmt.Println("We done done.")
 
 	return
 }
