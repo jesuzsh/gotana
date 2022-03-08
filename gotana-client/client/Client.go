@@ -163,7 +163,9 @@ func (clt *Client) GetAllMatchList(out chan<- repo.MatchListResult, pendingMatch
 	return
 }
 
-// ZipResults
+// ZipResults iterates over a channel that contains repo.MatchListResult's.
+// This function performs the compression of json data. Compressed data is sent
+// to an output channel for the next stage of the pipeline.
 func (clt *Client) ZipResults(out chan<- repo.ZipPayload, in <-chan repo.MatchListResult) {
 	var wg sync.WaitGroup
 
@@ -171,7 +173,6 @@ func (clt *Client) ZipResults(out chan<- repo.ZipPayload, in <-chan repo.MatchLi
 		wg.Add(1)
 		go func(result repo.MatchListResult) {
 			defer wg.Done()
-			//result.ListMatches()
 
 			fileJSON, err := json.Marshal(result)
 			if err != nil {
@@ -203,7 +204,8 @@ func (clt *Client) ZipResults(out chan<- repo.ZipPayload, in <-chan repo.MatchLi
 	return
 }
 
-// Persister
+// Persister is responsible for saving the json data in S3. The zipped files
+// are uploaded to S3 using the aws-sdk-go.
 func (clt *Client) Persister(in <-chan repo.ZipPayload) {
 	var wg sync.WaitGroup
 	sess := session.Must(session.NewSession(&aws.Config{
@@ -249,7 +251,8 @@ func (clt *Client) Persister(in <-chan repo.ZipPayload) {
 	return
 }
 
-// ProcessMatches
+// ProcessMatches is the overall orchestration of the pipeline. The required
+// channels are created and sent to relevant stages of the pipeline.
 func (clt *Client) ProcessMatches() {
 	totalMatches, _ := clt.TotalMatches()
 
@@ -265,7 +268,9 @@ func (clt *Client) ProcessMatches() {
 	return
 }
 
-// WriteMatchList (deprecated?)
+// WriteMatchList (deprecated?) is reponsible for accessing the buffer
+// attribute of the client and writing it to a file. This is currently not part
+// of a pipeline, and is meant for developmental use.
 func (clt *Client) WriteMatchList(filename string) (bool, error) {
 	log := clt.log
 	if len(clt.Buffer) == 0 {

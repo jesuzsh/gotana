@@ -2,6 +2,10 @@ package repo
 
 import "fmt"
 
+// MatchListResult contains a single match's data for a particular user. A
+// 'match' is defined as a full game, a matchup, being played by two teams that
+// ends in a winner/tie.
+// Source: https://autocode.com/lib/halo/infinite/0.3.9#stats-matches-list
 type MatchListResult struct {
 	Additional struct {
 		Gamertag string `json:"gamertag"`

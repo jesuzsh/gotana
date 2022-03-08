@@ -1,6 +1,10 @@
+// repo is the location where needed data structures are defined.
 package repo
 
-// Source: https://autocode.com/lib/halo/infinite/#stats-matches-list
+// MatchDetailsResult is all the data associated with a single match in the
+// game Halo: Infinte. Data for every player in a particular match is part of
+// this result.
+// Source: https://autocode.com/lib/halo/infinite/0.3.9#stats-matches-retrieve
 type MatchDetailsResult struct {
 	Data struct {
 		Details struct {
