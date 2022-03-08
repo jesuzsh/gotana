@@ -1,4 +1,6 @@
-package service
+// Package client implements a way to access various endpoints for retrieving
+// all the Halo data associated with particular users.
+package client
 
 import (
 	"bytes"
@@ -20,6 +22,7 @@ import (
 	"github.com/jesuzsh/gotana/gotana-client/repo"
 )
 
+// Client contains essential attributes for accessing relevant endpoints.
 type Client struct {
 	Target                 string
 	StatsMatchesEndpoint   string
@@ -33,6 +36,7 @@ func InitLogger() *zap.Logger {
 	return logger
 }
 
+// NewClient creates an instance of Client.
 func NewClient(target string, statsMatchesEndpoint string, statsMatchListEndpoint string) *Client {
 	log := InitLogger()
 
@@ -45,6 +49,7 @@ func NewClient(target string, statsMatchesEndpoint string, statsMatchListEndpoin
 	}
 }
 
+// GetMatchDetails retrieves the data associated with a particular match.
 func (clt *Client) GetMatchDetails() (string, error) {
 	resp, err := http.Get(clt.StatsMatchesEndpoint)
 	log := clt.log
@@ -69,6 +74,9 @@ func (clt *Client) GetMatchDetails() (string, error) {
 	return string(prettyDetails), nil
 }
 
+// GetMatchList retrieves match data for a particular user. This completes a
+// single request to the associated endpoint. Request parameters are specified
+// in a repo.MatchListPayload.
 func (clt *Client) GetMatchList(payload repo.MatchListPayload) (repo.MatchListResult, error) {
 	log := clt.log
 	if payload.Gamertag == "" {
@@ -95,6 +103,8 @@ func (clt *Client) GetMatchList(payload repo.MatchListPayload) (repo.MatchListRe
 	return matchList, nil
 }
 
+// TotalMatches makes a single request to discover the total number of matches
+// for a particular player.
 func (clt *Client) TotalMatches() (int, error) {
 	payload := repo.MatchListPayload{
 		Gamertag: clt.Target,
@@ -111,9 +121,9 @@ func (clt *Client) TotalMatches() (int, error) {
 	return int(mlr.Paging.Total), nil
 }
 
+// GetAllMatchList retrieves all existing match data for a particular user.
+// Many requests are made concurrently. The first stage of the pipeline.
 func (clt *Client) GetAllMatchList(out chan<- repo.MatchListResult, pendingMatches int) {
-	// TODO: remove
-	//pendingMatches = 25
 	var wg sync.WaitGroup
 	payload := repo.MatchListPayload{
 		Gamertag: clt.Target,
@@ -153,6 +163,7 @@ func (clt *Client) GetAllMatchList(out chan<- repo.MatchListResult, pendingMatch
 	return
 }
 
+// ZipResults
 func (clt *Client) ZipResults(out chan<- repo.ZipPayload, in <-chan repo.MatchListResult) {
 	var wg sync.WaitGroup
 
@@ -192,6 +203,7 @@ func (clt *Client) ZipResults(out chan<- repo.ZipPayload, in <-chan repo.MatchLi
 	return
 }
 
+// Persister
 func (clt *Client) Persister(in <-chan repo.ZipPayload) {
 	var wg sync.WaitGroup
 	sess := session.Must(session.NewSession(&aws.Config{
@@ -227,7 +239,6 @@ func (clt *Client) Persister(in <-chan repo.ZipPayload) {
 			}
 
 			fmt.Printf("file uploaded to, %s\n", aws.String(result.Location))
-
 		}(z)
 	}
 
@@ -238,6 +249,7 @@ func (clt *Client) Persister(in <-chan repo.ZipPayload) {
 	return
 }
 
+// ProcessMatches
 func (clt *Client) ProcessMatches() {
 	totalMatches, _ := clt.TotalMatches()
 
@@ -253,6 +265,7 @@ func (clt *Client) ProcessMatches() {
 	return
 }
 
+// WriteMatchList (deprecated?)
 func (clt *Client) WriteMatchList(filename string) (bool, error) {
 	log := clt.log
 	if len(clt.Buffer) == 0 {
