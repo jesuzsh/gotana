@@ -1,5 +1,5 @@
 # Gotana
-> Client to access match data for users in the game, Halo: Infinite.
+> Client to access a user's match data in the game, Halo: Infinite.
 
 ## Functionality
 Each of the following steps are done concurrently.
@@ -30,4 +30,4 @@ and the entire pipeline is completed in a matter of seconds (<3).
 ## Architecture
 The following diagram illustrates the current state of the overall pipeline:
 
-![alt text](https://github.com/jesuzsh/gotana/blob/jg-readme/architecture.png?raw=true)
+![alt text](https://github.com/jesuzsh/gotana/blob/main/architecture.png?raw=true)
