@@ -13,7 +13,7 @@ The following are the essential components of the architecture.
 
 ### Autocode endpoints
 Deployed JavaScript/Python code snippets that interact with an Autocode client 
-library. These deployed endpoints act as a light wrapperover Autocode's Halo 
+library. These deployed endpoints act as a light wrapper over Autocode's Halo 
 client library, so that they may be leveraged to get match data. Since there is
 a max of 25 matches returned per request, N being the total matches and greater
 than 25, N/25 is the number of requests needed to get all the match data for a
