@@ -30,4 +30,4 @@ and the entire pipeline is completed in a matter of seconds (<3).
 ## Architecture
 The following diagram illustrates the current state of the overall pipeline:
 
-![alt text](https://github.com/jesuzsh/gotana/blob/main/architecture.png?raw=true)
+![alt text](https://github.com/jesuzsh/gotana/blob/jg-readme/architecture.png?raw=true)
