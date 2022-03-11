@@ -20,7 +20,7 @@ func main() {
 		log.Fatal("please provide a valid autocode endpoint for retrieving match stats")
 	}
 
-	clt := client.NewClient("Lentilius", statsMatchesEndpoint, statsMatchListEndpoint)
+	clt := client.NewClient("Killamannjaro", statsMatchesEndpoint, statsMatchListEndpoint)
 
 	clt.ProcessMatches()
 }
