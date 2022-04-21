@@ -1,4 +1,3 @@
-// Package client implements a way to access various endpoints for retrieving
 // all the Halo data associated with particular users.
 package client
 
@@ -14,45 +13,32 @@ import (
 	"strconv"
 	"sync"
 
-	"go.uber.org/zap"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/jesuzsh/gotana/pkg/database"
 	"github.com/jesuzsh/gotana/pkg/repo"
 )
 
 // Client contains essential attributes for accessing relevant endpoints.
 type Client struct {
-	Target                 string
-	StatsMatchesEndpoint   string
-	StatsMatchListEndpoint string
-	log                    *zap.Logger
-	Buffer                 []uint8
-}
-
-func InitLogger() *zap.Logger {
-	logger, _ := zap.NewDevelopment()
-	return logger
+	User          *database.User
+	StatsEndpoint string
 }
 
 // NewClient creates an instance of Client.
-func NewClient(target string, statsMatchesEndpoint string, statsMatchListEndpoint string) *Client {
+func NewClient(user *database.User, statsEndpoint string) *Client {
 	return &Client{
-		Target:                 target,
-		StatsMatchesEndpoint:   statsMatchesEndpoint,
-		StatsMatchListEndpoint: statsMatchListEndpoint,
-		log:                    InitLogger(),
-		Buffer:                 []uint8{},
+		User:          user,
+		StatsEndpoint: statsEndpoint,
 	}
 }
 
 // GetMatchDetails retrieves the data associated with a particular match.
 func (clt *Client) GetMatchDetails() (string, error) {
-	resp, err := http.Get(clt.StatsMatchesEndpoint)
-	log := clt.log
+	resp, err := http.Get(clt.StatsEndpoint)
 	if err != nil {
-		log.Error("failed to fetch match data")
+		log.Fatal("failed to fetch match data")
 		return "", err
 	}
 
@@ -76,18 +62,17 @@ func (clt *Client) GetMatchDetails() (string, error) {
 // single request to the associated endpoint. Request parameters are specified
 // in a repo.MatchListPayload.
 func (clt *Client) GetMatchList(payload repo.MatchListPayload) (repo.MatchListResult, error) {
-	log := clt.log
 	if payload.Gamertag == "" {
 		log.Fatal("No gamertag specified. Unable to get MatchList.")
 	}
 
 	resp, err := http.Post(
-		clt.StatsMatchListEndpoint,
+		clt.StatsEndpoint,
 		"application/json",
 		bytes.NewBuffer(payload.Marshal()),
 	)
 	if err != nil {
-		log.Error("unable to obtain MatchList")
+		log.Fatal("unable to obtain MatchList")
 		return repo.MatchListResult{}, err
 	}
 	defer resp.Body.Close()
@@ -105,7 +90,7 @@ func (clt *Client) GetMatchList(payload repo.MatchListPayload) (repo.MatchListRe
 // for a particular player.
 func (clt *Client) TotalMatches() (int, error) {
 	payload := repo.MatchListPayload{
-		Gamertag: clt.Target,
+		Gamertag: clt.User.Gamertag,
 		Count:    1,
 		Offset:   0,
 		Mode:     "matchmade",
@@ -124,7 +109,7 @@ func (clt *Client) TotalMatches() (int, error) {
 func (clt *Client) GetAllMatchList(out chan<- repo.MatchListResult, pendingMatches int) {
 	var wg sync.WaitGroup
 	payload := repo.MatchListPayload{
-		Gamertag: clt.Target,
+		Gamertag: clt.User.Gamertag,
 		Count:    25,
 		Offset:   0,
 		Mode:     "matchmade",
@@ -136,7 +121,6 @@ func (clt *Client) GetAllMatchList(out chan<- repo.MatchListResult, pendingMatch
 			defer wg.Done()
 			mlr, err := clt.GetMatchList(p)
 			if err != nil {
-				fmt.Println("there is an error")
 				log.Print(err)
 				return
 			}
@@ -226,10 +210,9 @@ func (clt *Client) Persister(in <-chan repo.ZipPayload) {
 				fmt.Printf("WriteFileGZ ERROR: %+v", err)
 			}
 
-			fmt.Println("uploadiing to s3")
-			result, err := uploader.Upload(&s3manager.UploadInput{
+			_, err = uploader.Upload(&s3manager.UploadInput{
 				Bucket: aws.String("gotana"),
-				Key:    aws.String(clt.Target + "/" + zip.ID + ".json.gz"),
+				Key:    aws.String(clt.User.Gamertag + "/" + zip.ID + ".json.gz"),
 				Body:   file,
 			})
 			if err != nil {
@@ -237,8 +220,6 @@ func (clt *Client) Persister(in <-chan repo.ZipPayload) {
 				fmt.Errorf("failed to upload file, %v", err)
 				return
 			}
-
-			fmt.Printf("file uploaded to, %s\n", aws.String(result.Location))
 		}(z)
 	}
 
@@ -261,25 +242,8 @@ func (clt *Client) ProcessMatches() {
 	go clt.ZipResults(zippedResults, results)
 	clt.Persister(zippedResults)
 
-	fmt.Println("We done done.")
+	db := database.NewDevConnection()
+	db.MarkComplete(clt.User)
 
 	return
-}
-
-// WriteMatchList (deprecated?) is reponsible for accessing the buffer
-// attribute of the client and writing it to a file. This is currently not part
-// of a pipeline, and is meant for developmental use.
-func (clt *Client) WriteMatchList(filename string) (bool, error) {
-	log := clt.log
-	if len(clt.Buffer) == 0 {
-		log.Fatal("Empty buffer. Nothing to write.")
-	}
-
-	err := ioutil.WriteFile(filename, clt.Buffer, 0644)
-	if err != nil {
-		log.Error("unable to save json file")
-		return false, err
-	}
-
-	return true, nil
 }

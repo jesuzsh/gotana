@@ -8,41 +8,49 @@ import (
 	"os"
 	"strings"
 
+	"github.com/jesuzsh/gotana/pkg/client"
 	"github.com/jesuzsh/gotana/pkg/database"
 )
 
-const STATS_MATCH_LIST_ENDPOINT = "STATS_MATCH_LIST_ENDPOINT"
+const STATS_ENDPOINT = "STATS_ENDPOINT"
 
-func intro() {
-	var user string
-	flag.StringVar(&user, "user", "", "gamertag")
+func intro() *database.User {
+	var username string
+	flag.StringVar(&username, "username", "", "gamertag")
 	flag.Parse()
 
-	if user == "" {
+	if username == "" {
 		reader := bufio.NewReader(os.Stdin)
-		fmt.Print("Please enter a user: ")
-		user, _ = reader.ReadString('\n')
-		user = strings.TrimSuffix(user, "\n")
+		fmt.Print("Please enter a username: ")
+		username, _ = reader.ReadString('\n')
+		username = strings.TrimSuffix(username, "\n")
 
 	}
-	fmt.Printf("\n%v, welcome.\n", user)
+	fmt.Printf("\n%v, welcome.\n", username)
+
+	db := database.NewDevConnection()
+	user, _ := db.CheckIn(username)
+
+	return &user
 }
 
-func setup() {
-	statsMatchListEndpoint := os.Getenv(STATS_MATCH_LIST_ENDPOINT)
-
-	if statsMatchListEndpoint == "" {
+func setup(user *database.User) *client.Client {
+	statsEndpoint := os.Getenv(STATS_ENDPOINT)
+	if statsEndpoint == "" {
 		log.Fatal("please provide a valid autocode endpoint")
 	}
 
-	//clt := client.NewClient("Lentilius", "", statsMatchListEndpoint)
+	clt := client.NewClient(user, statsEndpoint)
 
-	//clt.ProcessMatches()
-
+	return clt
 }
 
 func main() {
-	intro()
+	user := intro()
+	clt := setup(user)
 
-	database.NewDevConnection()
+	fmt.Printf("\n Retrieving all match data...\n")
+	clt.ProcessMatches()
+	fmt.Printf("\n * Data processed. Check AWS.\n")
+
 }
