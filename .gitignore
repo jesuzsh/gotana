@@ -3,6 +3,7 @@
 *.exe~
 *.dll
 *.so
+*.db
 *.dylib
 
 # Test binary, built with `go test -c`
@@ -17,5 +18,3 @@
 
 *.env
 *.idea
-
-go.sum

@@ -19,7 +19,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/jesuzsh/gotana/gotana-client/repo"
+	"github.com/jesuzsh/gotana/pkg/repo"
 )
 
 // Client contains essential attributes for accessing relevant endpoints.
@@ -38,13 +38,11 @@ func InitLogger() *zap.Logger {
 
 // NewClient creates an instance of Client.
 func NewClient(target string, statsMatchesEndpoint string, statsMatchListEndpoint string) *Client {
-	log := InitLogger()
-
 	return &Client{
 		Target:                 target,
 		StatsMatchesEndpoint:   statsMatchesEndpoint,
 		StatsMatchListEndpoint: statsMatchListEndpoint,
-		log:                    log,
+		log:                    InitLogger(),
 		Buffer:                 []uint8{},
 	}
 }
